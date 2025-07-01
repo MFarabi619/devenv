@@ -570,6 +570,12 @@ impl Devenv {
         Ok(())
     }
 
+    #[instrument(
+        skip(self),
+        fields(
+            devenv.user_message = "Searching options and packages",
+        )
+    )]
     pub async fn search(&mut self, name: &str) -> Result<()> {
         self.assemble(false).await?;
 
@@ -604,7 +610,12 @@ impl Devenv {
             .collect::<Vec<_>>();
         let results_options_count = options_results.len();
 
-        let search = self.nix.search(name).await?;
+        let search_options = nix_backend::Options {
+            logging: false,
+            cache_output: true,
+            ..Default::default()
+        };
+        let search = self.nix.search(name, Some(search_options)).await?;
         let search_json: PackageResults =
             serde_json::from_slice(&search.stdout).expect("Failed to parse search results");
         let search_results = search_json
