@@ -367,8 +367,8 @@ impl Devenv {
 
     pub async fn shell(mut self) -> Result<()> {
         let mut shell_cmd = self.prepare_shell(&None, &[]).await?;
-        let span = info_span!("entering_shell", devenv.user_message = "Entering shell",);
-        let _ = shell_cmd.exec().instrument(span);
+        info!(devenv.is_user_message = true, "Entering shell");
+        let _ = shell_cmd.exec();
         Ok(())
     }
 
